@@ -1,0 +1,160 @@
+/*
+ * Copyright (c) 2020 Duccio Breschi
+ *
+ * SPDX-License-Identifier: MIT
+ */
+
+#include "../../../urchin.keymap"
+#include <behaviors.dtsi>
+#include <dt-bindings/zmk/keys.h>
+#include <dt-bindings/zmk/bt.h>
+#include <dt-bindings/zmk/outputs.h>
+
+#define BASE 0
+#define NUM 1
+#define SYM 2
+
+#define COMBO(NAME, BINDINGS, KEYPOS) \
+  combo_##NAME { \
+    timeout-ms = <35>; \
+    bindings = <BINDINGS>; \
+    key-positions = <KEYPOS>; \
+  };
+
+&mt {
+    tapping-term-ms = <160>;
+    quick-tap-ms = <150>;
+    flavor = "tap-preferred";
+};
+
+/ {
+    combos {
+        compatible = "zmk,combos";
+
+        COMBO(lpar, &kp LPAR, 11 13)
+        COMBO(rpar, &kp RPAR, 16 18)
+
+        COMBO(lbkt, &kp LBKT, 2 3)
+        COMBO(rbkt, &kp RBKT, 6 7)
+
+        COMBO(lbrc, &kp LBRC, 22 23)
+        COMBO(rbrc, &kp RBRC, 26 27)
+
+        COMBO(equal, &kp PLUS, 1 2)
+        COMBO(plus, &kp EQUAL, 21 22)
+        COMBO(minus, &kp MINUS, 7 8)
+        COMBO(under, &kp UNDER, 27 28)
+
+        COMBO(tab, &kp TAB, 11 12)
+        COMBO(esc, &kp ESC, 16 17)
+        COMBO(ret, &kp RET, 17 18)
+
+        COMBO(cmeta, &sk LA(LCTRL), 31 32)
+        COMBO(windows, &sk LGUI, 30 33)
+    };
+};
+
+/ {
+    behaviors {
+        bt_clear_macro: bt_clear_macro {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;  // macro doesn’t need extra params
+            label = "Clear Profile 0";
+            bindings = <&bt BT_SEL 0 &bt BT_CLR>;
+        };
+        bt_clear: bt_clear {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            tapping-term-ms = <5000>;
+            flavor = "tap-preferred";
+            bindings = <&bt_clear_macro>, <&none>;
+        };
+        email: email {
+            compatible = "zmk,behavior-macro";
+            label = "Type Email";
+            tap-ms = <5>;
+            #binding-cells = <0>;
+            bindings = < &kp D &kp S &kp C &kp H &kp N &kp E &kp I &kp D &kp E &kp R &kp N0 &kp N1 &kp N0 &kp N3 &kp AT &kp G &kp M &kp A &kp I &kp L &kp DOT &kp C &kp O &kp M >;
+        };
+        inner_comma: inner_comma {
+            compatible = "zmk,behavior-mod-morph";
+            #binding-cells = <0>;
+            bindings = <&kp SEMI>, <&kp LT>;
+            mods = <(MOD_LCTL|MOD_RCTL)>;
+        };
+        comma: comma {
+            compatible = "zmk,behavior-mod-morph";
+            #binding-cells = <0>;
+            bindings = <&kp COMMA>, <&inner_comma>;
+            mods = <(MOD_LSFT|MOD_RSFT)>;
+        };
+        inner_dot: inner_dot {
+            compatible = "zmk,behavior-mod-morph";
+            #binding-cells = <0>;
+            bindings = <&kp COLON>, <&kp GT>;
+            mods = <(MOD_LCTL|MOD_RCTL)>;
+        };
+        dot: dot {
+            compatible = "zmk,behavior-mod-morph";
+            #binding-cells = <0>;
+            bindings = <&kp DOT>, <&inner_dot>;
+            mods = <(MOD_LSFT|MOD_RSFT)>;
+        };
+        quotes: quotes {
+            compatible = "zmk,behavior-mod-morph";
+            #binding-cells = <0>;
+            bindings = <&kp SQT>, <&kp DQT>;
+            mods = <(MOD_LSFT|MOD_RSFT)>;
+        };
+        mts: mod_tap {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            flavor = "hold-preferred";
+            tapping-term-ms = <200>;
+            bindings = <&kp>, <&kp>;
+        };
+        lthumb: lthumb {
+            compatible = "zmk,behavior-hold-tap";
+            #binding-cells = <2>;
+            tapping-term-ms = <160>;
+            quick-tap-ms = <150>;
+            flavor = "tap-preferred";
+            bindings = <&kp>, <&sl>;
+        };
+
+    };
+
+    keymap {
+        compatible = "zmk,keymap";
+
+        default_layer {
+            label = "Base";
+            bindings = <
+                &kp Q            &kp W &kp E &kp R &kp T           &kp Y &kp U  &kp I        &kp O      &kp P
+                &kp A            &kp S &kp D &kp F &kp G           &kp H &kp J  &kp K        &kp L      &quotes
+                &mts LSHIFT Z    &kp X &kp C &kp V &kp B           &kp N &kp M  &comma       &dot       &mts RSHIFT SLASH
+                &lthumb LGUI SYM &mt LCTRL BSPC                    &kp SPACE    &sl NUM
+            >;
+        };
+
+        num_layer {
+            label = "NUM";
+            bindings = <
+                &none     &none    &none     &none     &none         &none      &none   &none   &none    &none
+                &kp N1    &kp N2   &kp N3    &kp N4    &kp N5        &kp N6     &kp N7  &kp N8  &kp N9   &kp N0
+                &none     &none    &none     &none     &none         &none      &none   &none   &none    &none
+                &none     &kp BSPC                                   &kp SPACE  &none
+            >;
+        };
+
+        sym_layer {
+            label = "SYM";
+                bindings = <
+                &email    &none    &none     &kp TILDE &none         &none     &kp RA(Z) &kp RA(L)   &kp RA(W)   &kp PIPE
+                &kp EXCL  &kp AT   &kp HASH  &kp GRAVE &kp PRCNT     &kp CARET &kp AMPS  &kp STAR    &kp DLLR    &kp BSLH
+                &bt_clear &none    &none     &none     &none         &none     &none     &none       &none       &none
+                &none     &kp BSPC                                   &kp SPACE &none
+            >;
+        };
+    };
+};
